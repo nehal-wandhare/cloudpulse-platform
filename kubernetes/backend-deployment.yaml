@@ -17,6 +17,11 @@ spec:
         app: backend
 
     spec:
+
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 2000
+
       containers:
 
         - name: backend
@@ -31,3 +36,32 @@ spec:
           env:
             - name: PROMETHEUS_URL
               value: "http://monitoring-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090"
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+            readOnlyRootFilesystem: false
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
