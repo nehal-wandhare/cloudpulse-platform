@@ -26,7 +26,7 @@ spec:
 
         - name: backend
 
-          image: nehalwandhare/cloudpulse-backend:v8
+          image: nehalwandhare/cloudpulse-backend:5f2d4cdc00a0180041a72bcaafa236ef7fe8cb58
 
           imagePullPolicy: Always
 

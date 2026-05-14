@@ -26,7 +26,7 @@ spec:
 
         - name: frontend
 
-          image: nehalwandhare/cloudpulse-frontend:v11
+          image: nehalwandhare/cloudpulse-frontend:5f2d4cdc00a0180041a72bcaafa236ef7fe8cb58
 
           imagePullPolicy: Always
 
