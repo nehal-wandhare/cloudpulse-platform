@@ -1,0 +1,44 @@
+services:
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+
+    container_name: cloudpulse-frontend
+
+    ports:
+      - "3000:3000"
+
+    restart: always
+
+    depends_on:
+      - backend
+
+    environment:
+      - NODE_ENV=production
+
+    networks:
+      - cloudpulse-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+
+    container_name: cloudpulse-backend
+
+    ports:
+      - "5000:5000"
+
+    restart: always
+
+    environment:
+      - NODE_ENV=production
+
+    networks:
+      - cloudpulse-network
+
+networks:
+  cloudpulse-network:
+    driver: bridge

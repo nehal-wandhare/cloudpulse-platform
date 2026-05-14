@@ -1,0 +1,165 @@
+name: CloudPulse Enterprise DevSecOps
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+
+  security-scans:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    # GITLEAKS
+
+    - name: GitLeaks Scan
+      uses: gitleaks/gitleaks-action@v2
+
+    # SEMGREP
+
+    - name: Semgrep SAST
+      uses: returntocorp/semgrep-action@v1
+
+    # SONARCLOUD
+
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarqube-scan-action@master
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+    # SNYK
+
+    - name: Snyk Open Source Scan
+      uses: snyk/actions/node@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+    # OWASP DEP CHECK
+
+    - name: OWASP Dependency Check
+      uses: dependency-check/Dependency-Check_Action@main
+      with:
+        project: 'cloudpulse'
+        path: '.'
+        format: 'HTML'
+
+    # TRIVY FILESYSTEM
+
+    - name: Trivy Filesystem Scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+
+    # CHECKOV
+
+    - name: Checkov IaC Scan
+      uses: bridgecrewio/checkov-action@master
+
+    # TFSEC
+
+    - name: tfsec Terraform Scan
+      uses: aquasecurity/tfsec-action@v1.0.3
+
+  build-and-push:
+
+    runs-on: ubuntu-latest
+
+    needs: security-scans
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    # DOCKER LOGIN
+
+    - name: Docker Login
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    # BUILD FRONTEND
+
+    - name: Build Frontend
+      run: |
+        docker build -t nehalwandhare/cloudpulse-frontend:${{ github.sha }} ./frontend
+
+    # BUILD BACKEND
+
+    - name: Build Backend
+      run: |
+        docker build -t nehalwandhare/cloudpulse-backend:${{ github.sha }} ./backend
+
+    # TRIVY IMAGE SCAN
+
+    - name: Trivy Frontend Image Scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: nehalwandhare/cloudpulse-frontend:${{ github.sha }}
+
+    - name: Trivy Backend Image Scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: nehalwandhare/cloudpulse-backend:${{ github.sha }}
+
+    # DOCKER SCOUT
+
+    - name: Docker Scout Scan
+      uses: docker/scout-action@v1
+      with:
+        command: quickview
+        image: nehalwandhare/cloudpulse-frontend:${{ github.sha }}
+
+    # PUSH IMAGES
+
+    - name: Push Frontend
+      run: |
+        docker push nehalwandhare/cloudpulse-frontend:${{ github.sha }}
+
+    - name: Push Backend
+      run: |
+        docker push nehalwandhare/cloudpulse-backend:${{ github.sha }}
+
+  gitops-update:
+
+    runs-on: ubuntu-latest
+
+    needs: build-and-push
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    # UPDATE FRONTEND IMAGE
+
+    - name: Update Frontend Manifest
+      run: |
+        sed -i 's|image:.*cloudpulse-frontend.*|image: nehalwandhare/cloudpulse-frontend:${{ github.sha }}|g' kubernetes/frontend-deployment.yaml
+
+    # UPDATE BACKEND IMAGE
+
+    - name: Update Backend Manifest
+      run: |
+        sed -i 's|image:.*cloudpulse-backend.*|image: nehalwandhare/cloudpulse-backend:${{ github.sha }}|g' kubernetes/backend-deployment.yaml
+
+    # PUSH MANIFEST CHANGES
+
+    - name: Commit Changes
+      run: |
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions@github.com"
+
+        git add .
+
+        git commit -m "Updated image versions"
+
+        git push

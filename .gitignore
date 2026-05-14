@@ -1,0 +1,121 @@
+# =========================
+# NODE MODULES
+# =========================
+
+node_modules/
+
+# =========================
+# NEXTJS
+# =========================
+
+.next/
+out/
+
+# =========================
+# ENV FILES
+# =========================
+
+.env
+.env.*
+*.env
+
+# =========================
+# LOG FILES
+# =========================
+
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================
+# TERRAFORM
+# =========================
+
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/.terraform.lock.hcl
+
+# =========================
+# DOCKER
+# =========================
+
+docker-compose.override.yml
+
+# =========================
+# OS FILES
+# =========================
+
+.DS_Store
+Thumbs.db
+
+# =========================
+# IDE FILES
+# =========================
+
+.vscode/
+.idea/
+
+# =========================
+# CACHE
+# =========================
+
+.cache/
+tmp/
+
+# =========================
+# BUILD FILES
+# =========================
+
+dist/
+build/
+
+# =========================
+# KUBECONFIG
+# =========================
+
+kubeconfig
+*.kubeconfig
+
+# =========================
+# SSH KEYS
+# =========================
+
+*.pem
+*.key
+id_rsa
+id_rsa.pub
+
+# =========================
+# AWS
+# =========================
+
+.aws/
+
+# =========================
+# COVERAGE
+# =========================
+
+coverage/
+
+# =========================
+# PACKAGE LOCK OPTIONAL
+# =========================
+
+# Uncomment if needed
+# package-lock.json
+
+# =========================
+# ARGOCD/GRAFANA LOGS
+# =========================
+
+argocd.log
+grafana.log
+prometheus.log
+
+# =========================
+# TERRAFORM PLAN
+# =========================
+
+*.tfplan
