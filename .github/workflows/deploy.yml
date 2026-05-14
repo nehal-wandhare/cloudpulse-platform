@@ -1,5 +1,8 @@
 name: CloudPulse Enterprise DevSecOps
 
+permissions:
+  contents: write
+
 on:
   push:
     branches:
