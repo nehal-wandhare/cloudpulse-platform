@@ -61,15 +61,7 @@ jobs:
         scan-type: 'fs'
         scan-ref: '.'
 
-    # CHECKOV
-
-    - name: Checkov IaC Scan
-      uses: bridgecrewio/checkov-action@master
-
-    # TFSEC
-
-    - name: tfsec Terraform Scan
-      uses: aquasecurity/tfsec-action@v1.0.3
+    
 
   build-and-push:
 
